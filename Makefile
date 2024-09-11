@@ -27,12 +27,12 @@ storages-logs:
 
 .PHONY: app
 app:
-	${DC} -f ${APP_FILE} -f ${STORAGES_FILE} ${ENV_FILE} up -d
+	${DC} -f ${APP_FILE} -f ${STORAGES_FILE} ${ENV_FILE} up --build -d
 
 
 .PHONY: app-build
 app-build:
-	${DC} -f ${APP_FILE} -f ${STORAGES_FILE} ${ENV_FILE} build 
+	${DC} -f ${APP_FILE} -f ${STORAGES_FILE} ${ENV_FILE} build --no-cache
 
 
 .PHONY: app-logs
