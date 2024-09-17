@@ -12,7 +12,8 @@ from core.api.v1.customers.schemas import (
 )
 from core.apps.common.exceptions import ServiceException
 from core.apps.customers.services.auth import BaseAuthService
-from core.apps.products.containers import get_container
+from core.project.containers import get_container
+
 
 router = Router(tags=["Customers"])
 

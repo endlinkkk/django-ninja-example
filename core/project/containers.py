@@ -8,7 +8,12 @@ from core.apps.customers.services.customers import (
     BaseCustomerService,
     ORMCustomerService,
 )
-from core.apps.customers.services.senders import BaseSenderService, DummySenderService
+from core.apps.customers.services.senders import (
+    BaseSenderService,
+    ComposeSenderService,
+    DummySenderService,
+    EmailSenderService,
+)
 from core.apps.products.services.products import BaseProductService, ORMProductService
 
 
@@ -25,7 +30,11 @@ def _init_container() -> punq.Container:
 
     # Customers
     container.register(BaseCustomerService, ORMCustomerService)
-    container.register(BaseSenderService, DummySenderService)
+    container.register(
+        BaseSenderService,
+        ComposeSenderService,
+        sender_services=[DummySenderService(), EmailSenderService()],
+    )
     container.register(BaseCodeService, DjangoCacheCodeService)
     container.register(BaseAuthService, AuthService)
 
