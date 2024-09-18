@@ -15,6 +15,13 @@ from core.apps.customers.services.senders import (
     EmailSenderService,
 )
 from core.apps.products.services.products import BaseProductService, ORMProductService
+from core.apps.products.services.reviews import (
+    BaseReviewService,
+    BaseReviewValidatorService,
+    ComposedReviewValidatorService,
+    ReviewService,
+)
+from core.apps.products.use_cases.reviews.create import CreateReviewUseCase
 
 
 @lru_cache(1)
@@ -37,5 +44,10 @@ def _init_container() -> punq.Container:
     )
     container.register(BaseCodeService, DjangoCacheCodeService)
     container.register(BaseAuthService, AuthService)
+    container.register(BaseReviewService, ReviewService)
+    container.register(
+        BaseReviewValidatorService, ComposedReviewValidatorService, validators=[]
+    )
+    container.register(CreateReviewUseCase)
 
     return container

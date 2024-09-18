@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from uuid import uuid4
 
 from core.apps.customers.entities import Customer
+from core.apps.customers.exceptions.customers import CustomerTokenInvalid
 from core.apps.customers.models import Customer as CustomerModel
 
 
@@ -17,6 +18,9 @@ class BaseCustomerService(ABC):
     @abstractmethod
     def get(self, phone: str) -> Customer: ...
 
+    @abstractmethod
+    def get_by_token(self, token: str) -> Customer: ...
+
 
 @dataclass
 class ORMCustomerService(BaseCustomerService):
@@ -25,10 +29,18 @@ class ORMCustomerService(BaseCustomerService):
         return customer_dto.to_entity()
 
     def get(self, phone: str) -> Customer:
-        user_dto = CustomerModel.objects.get(phone=phone)
-        return user_dto.to_entity()
+        customer_dto = CustomerModel.objects.get(phone=phone)
+        return customer_dto.to_entity()
 
     def generate_token(self, customer: Customer) -> str:
         token = str(uuid4())
         CustomerModel.objects.filter(phone=customer.phone).update(token=token)
         return token
+
+    def get_by_token(self, token: str) -> Customer:
+        try:
+            customer_dto = CustomerModel.objects.get(token=token)
+        except CustomerModel.DoesNotExist:
+            raise CustomerTokenInvalid(token=token)
+
+        return customer_dto.to_entity()

@@ -5,7 +5,7 @@ from core.apps.products.entities.products import Product as ProductEntity
 
 
 class ProductSchema(BaseModel):
-    oid: int
+    id: int
     title: str
     description: str
     created_at: datetime
@@ -14,7 +14,7 @@ class ProductSchema(BaseModel):
     @staticmethod
     def from_entity(entity: ProductEntity) -> "ProductSchema":
         return ProductSchema(
-            oid=entity.oid,
+            id=entity.id,
             title=entity.title,
             description=entity.description,
             created_at=entity.created_at,
