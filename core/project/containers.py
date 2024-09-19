@@ -19,7 +19,9 @@ from core.apps.products.services.reviews import (
     BaseReviewService,
     BaseReviewValidatorService,
     ComposedReviewValidatorService,
+    ReviewRatingValidatorService,
     ReviewService,
+    SingleReviewValidatorService,
 )
 from core.apps.products.use_cases.reviews.create import CreateReviewUseCase
 
@@ -30,6 +32,10 @@ def get_container():
 
 
 def _init_container() -> punq.Container:
+    
+
+
+
     container = punq.Container()
 
     # Products
@@ -45,9 +51,23 @@ def _init_container() -> punq.Container:
     container.register(BaseCodeService, DjangoCacheCodeService)
     container.register(BaseAuthService, AuthService)
     container.register(BaseReviewService, ReviewService)
+    
+    container.register(SingleReviewValidatorService)
+    container.register(ReviewRatingValidatorService)
+
+
+    def build_validators() -> BaseReviewValidatorService:
+        return ComposedReviewValidatorService(
+            validators=[
+                container.resolve(SingleReviewValidatorService),
+                container.resolve(ReviewRatingValidatorService)
+            ]
+        )
+
     container.register(
-        BaseReviewValidatorService, ComposedReviewValidatorService, validators=[]
-    )
+            BaseReviewValidatorService, factory=build_validators
+        )
+    
     container.register(CreateReviewUseCase)
 
     return container
