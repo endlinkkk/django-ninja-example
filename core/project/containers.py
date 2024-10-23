@@ -14,7 +14,7 @@ from core.apps.customers.services.senders import (
     DummySenderService,
     EmailSenderService,
 )
-from core.apps.products.services.products import BaseProductService, ORMProductService
+from core.apps.products.services.products import BaseProductService, BaseProductValidatorService, ComposedProductValidatorService, ORMProductService, ProductDescriptionValidatorService, ProductTitleValidatorService
 from core.apps.products.services.reviews import (
     BaseReviewService,
     BaseReviewValidatorService,
@@ -23,6 +23,7 @@ from core.apps.products.services.reviews import (
     ReviewService,
     SingleReviewValidatorService,
 )
+from core.apps.products.use_cases.products.create import CreateProductUseCase
 from core.apps.products.use_cases.reviews.create import CreateReviewUseCase
 
 
@@ -41,6 +42,24 @@ def _init_container() -> punq.Container:
     # Products
     container.register(BaseProductService, ORMProductService)
 
+    container.register(ProductTitleValidatorService)
+    container.register(ProductDescriptionValidatorService)
+
+    def build_product_validators() -> BaseProductValidatorService:
+        return ComposedProductValidatorService(
+            validators=[
+                container.resolve(ProductTitleValidatorService),
+                container.resolve(ProductDescriptionValidatorService),
+            ]
+        )
+    
+    container.register(
+            BaseProductValidatorService, factory=build_product_validators
+        )
+    
+    container.register(CreateProductUseCase)
+
+
     # Customers
     container.register(BaseCustomerService, ORMCustomerService)
     container.register(
@@ -56,18 +75,21 @@ def _init_container() -> punq.Container:
     container.register(ReviewRatingValidatorService)
 
 
-    def build_validators() -> BaseReviewValidatorService:
+    def build_review_validators() -> BaseReviewValidatorService:
         return ComposedReviewValidatorService(
             validators=[
                 container.resolve(SingleReviewValidatorService),
                 container.resolve(ReviewRatingValidatorService)
             ]
         )
+    
+
 
     container.register(
-            BaseReviewValidatorService, factory=build_validators
+            BaseReviewValidatorService, factory=build_review_validators
         )
     
     container.register(CreateReviewUseCase)
+    
 
     return container

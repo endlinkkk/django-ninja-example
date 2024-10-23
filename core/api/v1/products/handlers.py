@@ -1,12 +1,15 @@
 from django.http import HttpRequest
-from ninja import Query, Router
+from ninja import Header, Query, Router
+from ninja.errors import HttpError
 from core.api.filters import PaginationIn
 from core.api.schemas import ApiResponse, ListPaginatedResponse, PaginationOut
 from core.api.v1.products.filters import ProductFilters
-from core.api.v1.products.schemas import ProductSchema
+from core.api.v1.products.schemas import ProductInSchema, ProductSchema
 
+from core.apps.common.exceptions import ServiceException
 from core.apps.products.filters.products import ProductFilters as ProductFiltersEntity
 from core.apps.products.services.products import BaseProductService
+from core.apps.products.use_cases.products.create import CreateProductUseCase
 from core.project.containers import get_container
 
 router = Router(tags=["Products"])
@@ -36,3 +39,21 @@ def get_product_list_handler(
     return ApiResponse(
         data=ListPaginatedResponse(items=items, pagination=pagination_out)
     )
+
+
+@router.post("", response=ApiResponse[ProductSchema])
+def create_product_handler(
+    request: HttpRequest,
+    schema: ProductInSchema,
+    token: str = Header(alias="Auth-Token"),
+) -> ApiResponse[ProductSchema]:
+        container = get_container()
+        use_case: CreateProductUseCase = container.resolve(CreateProductUseCase)
+        try:
+            result = use_case.execute(
+                product=schema.to_entity(), customer_token=token,
+            )
+        except ServiceException as err:
+            raise HttpError(status_code=400, message=err.message)
+
+        return ApiResponse(data=ProductSchema.from_entity(result))
