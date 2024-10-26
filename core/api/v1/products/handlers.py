@@ -1,15 +1,16 @@
-from django.http import HttpRequest
+from django.http import HttpRequest, HttpResponse
 from ninja import Header, Query, Router
 from ninja.errors import HttpError
+
 from core.api.filters import PaginationIn
 from core.api.schemas import ApiResponse, ListPaginatedResponse, PaginationOut
 from core.api.v1.products.filters import ProductFilters
 from core.api.v1.products.schemas import ProductInSchema, ProductSchema
-
 from core.apps.common.exceptions import ServiceException
 from core.apps.products.filters.products import ProductFilters as ProductFiltersEntity
 from core.apps.products.services.products import BaseProductService
 from core.apps.products.use_cases.products.create import CreateProductUseCase
+from core.apps.products.use_cases.products.delete import DeleteProductUseCase
 from core.project.containers import get_container
 
 router = Router(tags=["Products"])
@@ -57,3 +58,22 @@ def create_product_handler(
             raise HttpError(status_code=400, message=err.message)
 
         return ApiResponse(data=ProductSchema.from_entity(result))
+
+
+
+@router.delete("", response=None)
+def delete_product_handler(
+    request: HttpRequest,
+    product_id: int,
+    token: str = Header(alias="Auth-Token"),
+) -> HttpResponse:
+        container = get_container()
+        use_case: DeleteProductUseCase = container.resolve(DeleteProductUseCase)
+        try:
+            use_case.execute(
+                product_id=product_id, customer_token=token,
+            )
+        except ServiceException as err:
+            raise HttpError(status_code=400, message=err.message)
+
+        return HttpResponse(status=204)

@@ -27,6 +27,9 @@ class BaseProductService(ABC):
     @abstractmethod
     def add_product(self, product: ProductEntity) -> ProductEntity: ...
 
+    @abstractmethod
+    def delete_product(self, product_id: int) -> None: ...
+
 
 @dataclass
 class BaseProductValidatorService(ABC):
@@ -102,3 +105,10 @@ class ORMProductService(BaseProductService):
     def add_product(self, product) -> ProductEntity:
         product_dto = ProductModel.objects.create(title=product.title, description=product.description)
         return product_dto.to_entity()
+    
+    def delete_product(self, product_id) -> None:
+        try:
+            product = ProductModel.objects.get(pk=product_id)
+            product.delete()
+        except ProductModel.DoesNotExist:
+            raise ProductNotFound(product_id=product_id)
