@@ -26,6 +26,7 @@ from core.apps.products.services.reviews import (
 from core.apps.products.use_cases.products.create import CreateProductUseCase
 from core.apps.products.use_cases.reviews.create import CreateReviewUseCase
 from core.apps.products.use_cases.products.delete import DeleteProductUseCase
+from core.apps.products.use_cases.reviews.get import GetReviewListUseCase
 
 
 @lru_cache(1)
@@ -92,6 +93,6 @@ def _init_container() -> punq.Container:
         )
     
     container.register(CreateReviewUseCase)
-    
+    container.register(GetReviewListUseCase)
 
     return container

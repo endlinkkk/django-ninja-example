@@ -22,6 +22,9 @@ class BaseReviewService(ABC):
         self, customer: CustomerEntity, product: ProductEntity, review: ReviewEntity
     ) -> ReviewEntity: ...
 
+    @abstractmethod
+    def get_product_reviews(self, product_id: int) -> list[ReviewEntity]: ...
+
 
 @dataclass
 class ReviewService(BaseReviewService):
@@ -44,6 +47,11 @@ class ReviewService(BaseReviewService):
         )
         review_dto.save()
         return review_dto.to_entity()
+    
+
+    def get_product_reviews(self, product_id: int) -> list[ReviewEntity]:
+        reviews = ReviewModel.objects.filter(product__id=product_id)
+        return [review.to_entity() for review in reviews]
 
 
 @dataclass
