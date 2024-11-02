@@ -15,14 +15,14 @@ class CreateProductUseCase:
     validator_service: BaseProductValidatorService
 
     def execute(
-        self, product: ProductEntity, customer_token: str,
+        self,
+        product: ProductEntity,
+        customer_token: str,
     ) -> ProductEntity:
         self.customer_service.get_by_token(token=customer_token)
 
-        self.validator_service.validate(
-            product=product
-        )
-        
+        self.validator_service.validate(product=product)
+
         saved_product = self.product_service.add_product(product=product)
 
         return saved_product

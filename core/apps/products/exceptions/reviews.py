@@ -19,4 +19,13 @@ class SingleReviewError(ServiceException):
 
     @property
     def message(self):
-        return 'The user already posted a review'
+        return "The user already posted a review"
+
+
+@dataclass(eq=False)
+class ReviewNotFound(ServiceException):
+    review_id: int
+
+    @property
+    def message(self):
+        return "A review with review id is not found"

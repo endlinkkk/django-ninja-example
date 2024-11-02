@@ -33,7 +33,7 @@ def auth_handler(
 @router.post(
     "confirm", response=ApiResponse[TokenOutSchema], operation_id="confirm-code"
 )
-def get_token(
+def get_token_handler(
     request: HttpRequest,
     schema: TokenInSchema,
 ) -> ApiResponse[TokenOutSchema]:

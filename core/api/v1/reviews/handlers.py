@@ -1,4 +1,4 @@
-from django.http import HttpRequest
+from django.http import HttpRequest, HttpResponse
 from ninja import Header, Router, Query
 from ninja.errors import HttpError
 from core.api.filters import PaginationIn, PaginationOut
@@ -10,6 +10,7 @@ from core.api.v1.reviews.schemas import (
 )
 from core.apps.common.exceptions import ServiceException
 from core.apps.products.use_cases.reviews.create import CreateReviewUseCase
+from core.apps.products.use_cases.reviews.delete import DeleteReviewUseCase
 from core.apps.products.use_cases.reviews.get import GetReviewListUseCase
 from core.project.containers import get_container
 
@@ -21,7 +22,7 @@ router = Router(tags=["Reviews"])
     response=ApiResponse[ReviewOutSchema],
     operation_id="createReview",
 )
-def create_review(
+def create_review_handler(
     request: HttpRequest,
     product_id: int,
     schema: ReviewInSchema,
@@ -52,15 +53,13 @@ def get_review_list_handler(
     container = get_container()
     use_case: GetReviewListUseCase = container.resolve(GetReviewListUseCase)
     try:
-        review_list = use_case.execute(
-            product_id=product_id
-        )
+        review_list = use_case.execute(product_id=product_id)
         items = [ReviewOutSchema.from_entity(obj) for obj in review_list]
         pagination_out = PaginationOut(
-        offset=pagination_in.offset,
-        limit=pagination_in.limit,
-        total=len(items),
-    )
+            offset=pagination_in.offset,
+            limit=pagination_in.limit,
+            total=len(items),
+        )
     except ServiceException as err:
         raise HttpError(status_code=400, message=err.message)
 
@@ -69,4 +68,21 @@ def get_review_list_handler(
     )
 
 
+@router.delete(
+    "/reviews/{review_id}",
+    response=None,
+    operation_id="deleteReview",
+)
+def delete_review_handler(
+    request: HttpRequest,
+    review_id: int,
+    token: str = Header(alias="Auth-Token"),
+) -> ApiResponse[ReviewOutSchema]:
+    container = get_container()
+    use_case: DeleteReviewUseCase = container.resolve(DeleteReviewUseCase)
+    try:
+        use_case.execute(review_id=review_id, customer_token=token)
+    except ServiceException as err:
+        raise HttpError(status_code=400, message=err.message)
 
+    return HttpResponse(status=204)

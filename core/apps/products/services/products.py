@@ -7,7 +7,11 @@ from django.db.models import Q
 from core.api.filters import PaginationIn
 from core.api.v1.products.filters import ProductFilters
 from core.apps.products.entities.products import Product as ProductEntity
-from core.apps.products.exceptions.products import ProductInvalidDescription, ProductInvalidTitle, ProductNotFound
+from core.apps.products.exceptions.products import (
+    ProductInvalidDescription,
+    ProductInvalidTitle,
+    ProductNotFound,
+)
 from core.apps.products.models.products import Product as ProductModel
 
 
@@ -100,12 +104,13 @@ class ORMProductService(BaseProductService):
             raise ProductNotFound(product_id=product_id)
 
         return product_dto.to_entity()
-    
 
     def add_product(self, product) -> ProductEntity:
-        product_dto = ProductModel.objects.create(title=product.title, description=product.description)
+        product_dto = ProductModel.objects.create(
+            title=product.title, description=product.description
+        )
         return product_dto.to_entity()
-    
+
     def delete_product(self, product_id) -> None:
         try:
             product = ProductModel.objects.get(pk=product_id)

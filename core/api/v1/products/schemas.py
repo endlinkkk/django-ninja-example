@@ -8,7 +8,6 @@ class ProductInSchema(BaseModel):
     title: str
     description: str
 
-
     def to_entity(self) -> ProductEntity:
         return ProductEntity(
             title=self.title,

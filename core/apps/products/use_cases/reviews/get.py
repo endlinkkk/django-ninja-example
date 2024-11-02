@@ -11,11 +11,9 @@ class GetReviewListUseCase:
     review_service: BaseReviewService
 
     def execute(
-        self, product_id: int,
+        self,
+        product_id: int,
     ) -> list[ReviewEntity]:
-
-        reviews = self.review_service.get_product_reviews(
-            product_id=product_id
-        )
+        reviews = self.review_service.get_product_reviews(product_id=product_id)
 
         return reviews

@@ -12,7 +12,6 @@ class ProductNotFound(ServiceException):
         return "A product with product id is not found"
 
 
-
 @dataclass(eq=False)
 class ProductInvalidTitle(ServiceException):
     title: str
@@ -25,7 +24,7 @@ class ProductInvalidTitle(ServiceException):
 @dataclass(eq=False)
 class ProductInvalidDescription(ServiceException):
     description: str
-    
+
     @property
     def message(self):
         return "A product description is too long"

@@ -48,17 +48,17 @@ def create_product_handler(
     schema: ProductInSchema,
     token: str = Header(alias="Auth-Token"),
 ) -> ApiResponse[ProductSchema]:
-        container = get_container()
-        use_case: CreateProductUseCase = container.resolve(CreateProductUseCase)
-        try:
-            result = use_case.execute(
-                product=schema.to_entity(), customer_token=token,
-            )
-        except ServiceException as err:
-            raise HttpError(status_code=400, message=err.message)
+    container = get_container()
+    use_case: CreateProductUseCase = container.resolve(CreateProductUseCase)
+    try:
+        result = use_case.execute(
+            product=schema.to_entity(),
+            customer_token=token,
+        )
+    except ServiceException as err:
+        raise HttpError(status_code=400, message=err.message)
 
-        return ApiResponse(data=ProductSchema.from_entity(result))
-
+    return ApiResponse(data=ProductSchema.from_entity(result))
 
 
 @router.delete("", response=None)
@@ -67,13 +67,14 @@ def delete_product_handler(
     product_id: int,
     token: str = Header(alias="Auth-Token"),
 ) -> HttpResponse:
-        container = get_container()
-        use_case: DeleteProductUseCase = container.resolve(DeleteProductUseCase)
-        try:
-            use_case.execute(
-                product_id=product_id, customer_token=token,
-            )
-        except ServiceException as err:
-            raise HttpError(status_code=400, message=err.message)
+    container = get_container()
+    use_case: DeleteProductUseCase = container.resolve(DeleteProductUseCase)
+    try:
+        use_case.execute(
+            product_id=product_id,
+            customer_token=token,
+        )
+    except ServiceException as err:
+        raise HttpError(status_code=400, message=err.message)
 
-        return HttpResponse(status=204)
+    return HttpResponse(status=204)

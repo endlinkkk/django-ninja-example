@@ -14,7 +14,14 @@ from core.apps.customers.services.senders import (
     DummySenderService,
     EmailSenderService,
 )
-from core.apps.products.services.products import BaseProductService, BaseProductValidatorService, ComposedProductValidatorService, ORMProductService, ProductDescriptionValidatorService, ProductTitleValidatorService
+from core.apps.products.services.products import (
+    BaseProductService,
+    BaseProductValidatorService,
+    ComposedProductValidatorService,
+    ORMProductService,
+    ProductDescriptionValidatorService,
+    ProductTitleValidatorService,
+)
 from core.apps.products.services.reviews import (
     BaseReviewService,
     BaseReviewValidatorService,
@@ -26,6 +33,7 @@ from core.apps.products.services.reviews import (
 from core.apps.products.use_cases.products.create import CreateProductUseCase
 from core.apps.products.use_cases.reviews.create import CreateReviewUseCase
 from core.apps.products.use_cases.products.delete import DeleteProductUseCase
+from core.apps.products.use_cases.reviews.delete import DeleteReviewUseCase
 from core.apps.products.use_cases.reviews.get import GetReviewListUseCase
 
 
@@ -35,10 +43,6 @@ def get_container():
 
 
 def _init_container() -> punq.Container:
-    
-
-
-
     container = punq.Container()
 
     # Products
@@ -54,14 +58,11 @@ def _init_container() -> punq.Container:
                 container.resolve(ProductDescriptionValidatorService),
             ]
         )
-    
-    container.register(
-            BaseProductValidatorService, factory=build_product_validators
-        )
-    
+
+    container.register(BaseProductValidatorService, factory=build_product_validators)
+
     container.register(CreateProductUseCase)
     container.register(DeleteProductUseCase)
-
 
     # Customers
     container.register(BaseCustomerService, ORMCustomerService)
@@ -73,26 +74,22 @@ def _init_container() -> punq.Container:
     container.register(BaseCodeService, DjangoCacheCodeService)
     container.register(BaseAuthService, AuthService)
     container.register(BaseReviewService, ReviewService)
-    
+
     container.register(SingleReviewValidatorService)
     container.register(ReviewRatingValidatorService)
-
 
     def build_review_validators() -> BaseReviewValidatorService:
         return ComposedReviewValidatorService(
             validators=[
                 container.resolve(SingleReviewValidatorService),
-                container.resolve(ReviewRatingValidatorService)
+                container.resolve(ReviewRatingValidatorService),
             ]
         )
-    
 
+    container.register(BaseReviewValidatorService, factory=build_review_validators)
 
-    container.register(
-            BaseReviewValidatorService, factory=build_review_validators
-        )
-    
     container.register(CreateReviewUseCase)
     container.register(GetReviewListUseCase)
+    container.register(DeleteReviewUseCase)
 
     return container
